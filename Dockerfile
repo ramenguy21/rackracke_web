@@ -1,33 +1,14 @@
-FROM php:8.4-cli-alpine
+FROM serversideup/php:8.4-cli
 
-RUN apk add --no-cache \
-    postgresql-dev \
-    oniguruma-dev \
-    libpng-dev \
-    freetype-dev \
-    libjpeg-turbo-dev \
-    libzip-dev \
-    zip \
-    unzip \
-    nodejs \
-    npm \
-    curl
+USER root
+RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-configure gd \
-        --with-freetype \
-        --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        pdo_pgsql \
-        pgsql \
-        mbstring \
-        zip \
-        gd \
-        bcmath
-
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /app
+WORKDIR /var/www/html
 
+# PHP deps
 COPY composer.json composer.lock ./
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
         --no-dev \
@@ -37,6 +18,7 @@ RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
         --no-interaction \
         --prefer-dist
 
+# JS deps + build
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -46,13 +28,12 @@ RUN npm run build \
     && COMPOSER_ALLOW_SUPERUSER=1 composer dump-autoload --optimize --ignore-platform-reqs \
     && php artisan package:discover --ansi
 
-RUN mkdir -p storage/framework/{sessions,views,cache/data} \
-             bootstrap/cache \
+RUN mkdir -p storage/framework/{sessions,views,cache/data} bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
-
-EXPOSE ${PORT:-8080}
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
+
+EXPOSE 8080
 
 CMD ["/start.sh"]
