@@ -116,3 +116,7 @@
   .al2-photo-grid { grid-template-columns: repeat(2, 1fr); }
   .al2-photo-grid .slot.hero { grid-column: auto; grid-row: auto; }
 }
+
+/* ── Onboarding ───────────────────────────────────────────────────── */
+.onb2-error { color: #B72A2A; font-size: 13.5px; margin-top: var(--s-2); }
+.opacity-60 { opacity: .6; }

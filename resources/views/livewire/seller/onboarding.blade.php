@@ -120,9 +120,3 @@
 
   </div>
 </div>
-
-<style>
-.onb2-error { color:#B72A2A;font-size:13.5px;margin-top:var(--s-2); }
-@keyframes spin { to { transform:rotate(360deg); } }
-.opacity-60 { opacity:.6; }
-</style>
