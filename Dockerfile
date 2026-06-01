@@ -42,7 +42,10 @@ COPY composer.json composer.lock ./
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
         --no-dev \
         --optimize-autoloader \
-        --no-scripts
+        --no-scripts \
+        --ignore-platform-reqs \
+        --no-interaction \
+        --prefer-dist
 
 # JS deps
 COPY package.json package-lock.json ./
@@ -52,7 +55,7 @@ RUN npm ci
 COPY . .
 
 RUN npm run build \
-    && COMPOSER_ALLOW_SUPERUSER=1 composer dump-autoload --optimize \
+    && COMPOSER_ALLOW_SUPERUSER=1 composer dump-autoload --optimize --ignore-platform-reqs \
     && php artisan package:discover --ansi
 
 # Storage dirs
