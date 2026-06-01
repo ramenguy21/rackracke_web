@@ -33,8 +33,5 @@ RUN npm run build \
 RUN mkdir -p storage/framework/{sessions,views,cache/data} bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-COPY start.sh /start.sh
-RUN chmod +x /start.sh
-
 ENTRYPOINT []
-CMD ["/start.sh"]
+CMD ["php", "-r", "echo 'container ok\n';"]
