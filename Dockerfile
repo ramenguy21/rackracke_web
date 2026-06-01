@@ -1,24 +1,26 @@
-FROM serversideup/php:8.4-cli
+FROM php:8.4-cli
 
-USER root
-RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libonig-dev \
+    libzip-dev \
+    libpng-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    zip unzip curl nodejs npm \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) pdo_pgsql pgsql mbstring zip gd bcmath \
+    && rm -rf /var/lib/apt/lists/*
 
-# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www/html
+WORKDIR /app
 
-# PHP deps
 COPY composer.json composer.lock ./
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
-        --no-dev \
-        --optimize-autoloader \
-        --no-scripts \
-        --ignore-platform-reqs \
-        --no-interaction \
-        --prefer-dist
+        --no-dev --optimize-autoloader --no-scripts \
+        --ignore-platform-reqs --no-interaction --prefer-dist
 
-# JS deps + build
 COPY package.json package-lock.json ./
 RUN npm ci
 
@@ -34,6 +36,5 @@ RUN mkdir -p storage/framework/{sessions,views,cache/data} bootstrap/cache \
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-EXPOSE 8080
-
+ENTRYPOINT []
 CMD ["/start.sh"]
