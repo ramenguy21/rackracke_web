@@ -13,8 +13,12 @@
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   @stack('styles')
   @livewireStyles
+  <style>
+    .rr-progress-bar { position:fixed;top:0;left:0;z-index:9999;height:2px;background:var(--blue);transition:width .3s ease;width:0;pointer-events:none; }
+  </style>
 </head>
 <body>
+  <div class="rr-progress-bar" wire:loading.style="width:70%" wire:loading.delay.shortest></div>
   {{ $slot }}
   @livewireScripts
 </body>

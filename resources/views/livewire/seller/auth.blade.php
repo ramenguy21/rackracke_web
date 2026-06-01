@@ -145,7 +145,7 @@
     {{-- New seller link --}}
     <p style="text-align:center;font-size:13px;margin-top:var(--s-4)">
       No account yet?
-      <a href="{{ route('seller.onboarding') }}" style="color:var(--blue);font-weight:600">Create your shop →</a>
+      <a href="{{ route('seller.onboarding') }}" style="color:var(--blue);font-weight:600" wire:navigate>Create your shop →</a>
     </p>
 
   </div>

@@ -13,8 +13,13 @@
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   @stack('styles')
   @livewireStyles
+  <style>
+    .rr-progress-bar { position:fixed;top:0;left:0;z-index:9999;height:2px;background:var(--blue);transition:width .3s ease;width:0;pointer-events:none; }
+    .rr-progress-bar[style*="width: 100"] { transition:width .1s ease,opacity .4s ease .1s;opacity:0; }
+  </style>
 </head>
 <body>
+  <div class="rr-progress-bar" wire:loading.style="width:70%" wire:loading.delay.shortest></div>
 
   <x-seller.top-bar :active="$active ?? 'Rack'" />
 

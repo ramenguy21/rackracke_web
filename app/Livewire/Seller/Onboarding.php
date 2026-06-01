@@ -15,16 +15,11 @@ class Onboarding extends Component
     public int $step = 1;
     public int $totalSteps = 3;
 
-    // Step 1
     public string $shopName = '';
-    public string $handle = '';
-
-    // Step 2
-    public string $city = '';
-
-    // Step 3
-    public string $phone = '';
-    public string $email = '';
+    public string $handle   = '';
+    public string $city     = '';
+    public string $phone    = '';
+    public string $email    = '';
     public string $password = '';
 
     public function updatedShopName(string $value): void
@@ -35,8 +30,12 @@ class Onboarding extends Component
     public function nextStep(): void
     {
         match ($this->step) {
-            1 => $this->validate(['shopName' => 'required|string|min:2|max:60|unique:sellers,shop_name']),
-            2 => $this->validate(['city' => 'required|string']),
+            1 => $this->validate([
+                'shopName' => 'required|string|min:2|max:60|unique:sellers,shop_name',
+            ]),
+            2 => $this->validate([
+                'city' => 'required|string',
+            ]),
             default => null,
         };
 

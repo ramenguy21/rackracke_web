@@ -13,24 +13,25 @@ class Sales extends Component
 
     public function render()
     {
-        $seller  = auth('seller')->user();
+        $seller     = auth('seller')->user();
         $listingIds = $seller->listings()->pluck('id');
 
+        // state is a cast column, not a relation — use where() directly
         $awaiting = Order::whereIn('listing_id', $listingIds)
-            ->whereHas('state', fn ($q) => $q->where('state', 'Placed'))
+            ->whereIn('state', ['Placed', 'CodConfirm', 'Procuring'])
             ->with('listing')
             ->latest()
             ->get();
 
         $tabOrders = match ($this->activeTab) {
             'transit'   => Order::whereIn('listing_id', $listingIds)
-                ->whereIn('state', ['Procuring', 'OutForDelivery'])
+                ->whereIn('state', ['OutForDelivery'])
                 ->with('listing')->latest()->get(),
             'delivered' => Order::whereIn('listing_id', $listingIds)
                 ->whereIn('state', ['Delivered', 'Collected', 'Settled'])
                 ->with('listing')->latest()->get(),
             default     => Order::whereIn('listing_id', $listingIds)
-                ->whereIn('state', ['Cancelled', 'DeliveryFailed', 'ReturnedToSeller', 'Refunded'])
+                ->whereIn('state', ['Cancelled', 'DeliveryFailed', 'ReturnedToSeller', 'Refunded', 'ProcurementFailed'])
                 ->with('listing')->latest()->get(),
         };
 

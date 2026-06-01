@@ -13,29 +13,27 @@ class Dashboard extends Component
 
     public function render()
     {
-        $seller = auth('seller')->user();
+        $seller   = auth('seller')->user();
+        $all      = $seller->listings()->latest()->get();
 
-        $listingsQuery = $seller->listings()->latest();
-
-        $listings = match ($this->activeTab) {
-            'live'   => (clone $listingsQuery)->where('status', 'live')->get(),
-            'drafts' => (clone $listingsQuery)->where('status', 'draft')->get(),
-            'sold'   => (clone $listingsQuery)->where('status', 'sold')->get(),
-            default  => $listingsQuery->get(),
-        };
-
+        // Build counts from the already-loaded collection — no extra queries
         $counts = [
-            'all'    => $seller->listings()->count(),
-            'live'   => $seller->listings()->where('status', 'live')->count(),
-            'drafts' => $seller->listings()->where('status', 'draft')->count(),
-            'sold'   => $seller->listings()->where('status', 'sold')->count(),
+            'all'    => $all->count(),
+            'live'   => $all->where('status', 'live')->count(),
+            'drafts' => $all->where('status', 'draft')->count(),
+            'sold'   => $all->where('status', 'sold')->count(),
         ];
 
-        $pendingPayout = $seller->pendingPayoutTotal();
+        $listings = match ($this->activeTab) {
+            'live'   => $all->where('status', 'live')->values(),
+            'drafts' => $all->where('status', 'draft')->values(),
+            'sold'   => $all->where('status', 'sold')->values(),
+            default  => $all,
+        };
 
-        $weekStart  = Carbon::now()->startOfWeek();
+        $pendingPayout   = $seller->pendingPayoutTotal();
         $revenueThisWeek = $seller->ledgerEntries()
-            ->where('credited_at', '>=', $weekStart)
+            ->where('credited_at', '>=', Carbon::now()->startOfWeek())
             ->sum('amount_owed_pkr');
 
         return view('livewire.seller.dashboard', [
@@ -43,7 +41,7 @@ class Dashboard extends Component
             'listings'        => $listings,
             'counts'          => $counts,
             'pendingPayout'   => $pendingPayout,
-            'revenueThisWeek' => $revenueThisWeek,
+            'revenueThisWeek' => (int) $revenueThisWeek,
         ]);
     }
 }

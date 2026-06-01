@@ -13,11 +13,13 @@ class Wallet extends Component
         $seller = auth('seller')->user();
 
         $owed = $seller->ledgerEntries()
+            ->with('order.listing')
             ->where('status', 'owed')
             ->orderByDesc('credited_at')
             ->get();
 
         $paidOut = $seller->ledgerEntries()
+            ->with('order.listing')
             ->where('status', 'paid_out')
             ->orderByDesc('paid_out_at')
             ->get();

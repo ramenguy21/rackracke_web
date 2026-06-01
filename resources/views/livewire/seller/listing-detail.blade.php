@@ -22,17 +22,17 @@
   ][$listing->status] ?? $listing->status;
 @endphp
 
-<div class="shell" x-data="{ activePhoto: 0, showOverflow: false, showDelete: @entangle('showDeleteConfirm') }">
+<div class="shell" x-data="{ activePhoto: 0, showOverflow: false, showDelete: $wire.entangle('showDeleteConfirm') }">
   <div class="pd2 page-enter">
 
     {{-- Back + overflow --}}
     <div class="backbar">
-      <a href="{{ route('seller.dashboard') }}" class="btn btn-ghost btn-sm">
+      <a href="{{ route('seller.dashboard') }}" class="btn btn-ghost btn-sm" wire:navigate>
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Back to rack
       </a>
       <div class="actions" style="position:relative">
-        <a href="{{ route('seller.listings.edit', $listing) }}" class="btn btn-soft btn-sm">Edit</a>
+        <a href="{{ route('seller.listings.edit', $listing) }}" class="btn btn-soft btn-sm" wire:navigate>Edit</a>
         <button class="btn btn-ghost btn-sm" @click="showOverflow = !showOverflow">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
         </button>
@@ -41,7 +41,7 @@
         <div x-show="showOverflow" x-transition:enter="transition ease-out duration-100"
              x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
              class="overflow-menu" @click.away="showOverflow = false" style="display:none">
-          <a href="{{ route('seller.listings.edit', $listing) }}">
+          <a href="{{ route('seller.listings.edit', $listing) }}" wire:navigate>
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             Edit listing
           </a>
@@ -129,7 +129,7 @@
 
     {{-- Actions --}}
     <div class="pd2-actions">
-      <a href="{{ route('seller.listings.edit', $listing) }}" class="btn btn-ink">
+      <a href="{{ route('seller.listings.edit', $listing) }}" class="btn btn-ink" wire:navigate>
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         Edit
       </a>

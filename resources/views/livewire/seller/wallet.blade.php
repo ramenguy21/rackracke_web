@@ -30,7 +30,7 @@
           <strong>Where should your earnings go?</strong>
           <span>Add a bank account and we'll deposit your payouts every Friday.</span>
         </div>
-        <a href="{{ route('seller.settings') }}" class="btn btn-primary">Add bank account</a>
+        <a href="{{ route('seller.settings') }}" class="btn btn-primary" wire:navigate>Add bank account</a>
       </div>
     @endif
 
@@ -68,7 +68,7 @@
       <div class="section-h">
         <h3>Payout <span class="it">history</span></h3>
         @if ($hasMethod)
-          <a href="{{ route('seller.settings') }}" class="btn btn-soft btn-sm">Change method</a>
+          <a href="{{ route('seller.settings') }}" class="btn btn-soft btn-sm" wire:navigate>Change method</a>
         @endif
       </div>
       <div class="orders-list">

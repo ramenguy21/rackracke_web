@@ -5,14 +5,14 @@
 @endphp
 
 <div class="order-row sale-row">
-    <a href="{{ route('seller.listings.show', $order->listing) }}" class="thumb">
+    <a href="{{ route('seller.listings.show', $order->listing) }}" class="thumb" wire:navigate>
         @if ($order->listing->photos && count($order->listing->photos) > 0)
             <img src="{{ Storage::url($order->listing->photos[0]) }}" alt="{{ $order->listing->title }}">
         @endif
     </a>
 
     <div class="meta">
-        <a href="{{ route('seller.listings.show', $order->listing) }}" class="title title-link">
+        <a href="{{ route('seller.listings.show', $order->listing) }}" class="title title-link" wire:navigate>
             {{ $order->listing->title }}
         </a>
         <div class="sub">
@@ -35,7 +35,7 @@
     </div>
 
     <div class="actions">
-        <a href="{{ route('seller.listings.show', $order->listing) }}" class="row-view" title="View piece">
+        <a href="{{ route('seller.listings.show', $order->listing) }}" class="row-view" title="View piece" wire:navigate>
             <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
         </a>
     </div>

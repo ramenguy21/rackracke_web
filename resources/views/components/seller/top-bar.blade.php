@@ -14,7 +14,7 @@
 <header class="bar">
     <div class="shell-wide">
         <div class="bar-inner">
-            <a href="{{ route('seller.dashboard') }}" class="brand" aria-label="Home">
+            <a href="{{ route('seller.dashboard') }}" class="brand" aria-label="Home" wire:navigate>
                 <span class="brand-mark">rr</span>
                 <span>rackrake</span>
             </a>
@@ -23,14 +23,14 @@
                 @foreach ($tabs as $tab)
                     <a href="{{ route($tab['route']) }}"
                        class="{{ $active === $tab['id'] ? 'active' : '' }}"
-                       role="button">
+                       role="button" wire:navigate>
                         {{ $tab['id'] }}
                     </a>
                 @endforeach
             </nav>
 
             <div class="bar-right">
-                <a href="{{ route('seller.settings') }}" class="avatar" title="Account & settings">
+                <a href="{{ route('seller.settings') }}" class="avatar" title="Account & settings" wire:navigate>
                     {{ $initial }}
                 </a>
             </div>

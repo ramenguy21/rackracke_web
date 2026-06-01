@@ -29,7 +29,7 @@
     {{-- ── Snapshot cards ───────────────────────────────────────────── --}}
     @unless ($isEmpty)
       <div class="snapshot snapshot-2" style="margin-bottom:var(--s-5)">
-        <a href="{{ route('seller.wallet') }}" class="snap snap-feature">
+        <a href="{{ route('seller.wallet') }}" class="snap snap-feature" wire:navigate>
           <div class="snap-head">
             <div class="snap-title">Money you've earned</div>
             <div class="snap-cap">on its way to your bank</div>
@@ -43,7 +43,7 @@
           <div class="sub">{{ $pendingPayout > 0 ? 'Clears Friday · to your bank' : 'No payout pending' }}</div>
         </a>
 
-        <a href="{{ route('seller.sales') }}" class="snap">
+        <a href="{{ route('seller.sales') }}" class="snap" wire:navigate>
           <div class="snap-head">
             <div class="snap-title">Sold this week</div>
             <div class="snap-cap">Mon – Sun</div>
@@ -73,7 +73,7 @@
           <div class="stats">{{ $seller->city }} · Pakistan</div>
         @endif
       </div>
-      <a href="{{ route('seller.settings') }}" class="btn btn-soft btn-sm" style="margin-left:auto">
+      <a href="{{ route('seller.settings') }}" class="btn btn-soft btn-sm" style="margin-left:auto" wire:navigate>
         Settings
       </a>
     </div>
@@ -104,7 +104,7 @@
         </div>
         <h3>Your <span class="it">rack</span> is empty.</h3>
         <p>List your first piece — it takes about a minute and buyers are already here.</p>
-        <a href="{{ route('seller.listings.create') }}" class="btn btn-primary">
+        <a href="{{ route('seller.listings.create') }}" class="btn btn-primary" wire:navigate>
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           List your first piece
         </a>
@@ -126,7 +126,7 @@
         @if ($activeTab === 'live')
           <h3>Nothing live yet.</h3>
           <p>Post a listing and we'll review it — once approved it goes straight to buyers.</p>
-          <a href="{{ route('seller.listings.create') }}" class="btn btn-primary btn-sm" style="margin-top:var(--s-3)">Add a listing</a>
+          <a href="{{ route('seller.listings.create') }}" class="btn btn-primary btn-sm" style="margin-top:var(--s-3)" wire:navigate>Add a listing</a>
         @elseif ($activeTab === 'drafts')
           <h3>No drafts.</h3>
           <p>Start a listing and save it as a draft to finish later.</p>
@@ -143,7 +143,7 @@
     @else
       <div class="grid2">
         @foreach ($listings as $listing)
-          <a href="{{ route('seller.listings.show', $listing) }}" class="tile2">
+          <a href="{{ route('seller.listings.show', $listing) }}" class="tile2" wire:navigate>
             <div class="img">
               @if (!empty($listing->photos))
                 <img src="{{ Storage::url($listing->photos[0]) }}" alt="{{ $listing->title }}" loading="lazy">
@@ -181,7 +181,7 @@
 
   {{-- FAB --}}
   @unless ($isEmpty)
-    <a href="{{ route('seller.listings.create') }}" class="fab" aria-label="New listing">
+    <a href="{{ route('seller.listings.create') }}" class="fab" aria-label="New listing" wire:navigate>
       <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       New listing
     </a>

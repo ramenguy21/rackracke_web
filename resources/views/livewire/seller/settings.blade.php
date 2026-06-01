@@ -146,7 +146,7 @@
       <button wire:click="logout" class="btn btn-ghost btn-sm" style="color:var(--muted);margin-right:auto">
         Sign out
       </button>
-      <a href="{{ route('seller.dashboard') }}" class="btn btn-soft">Cancel</a>
+      <a href="{{ route('seller.dashboard') }}" class="btn btn-soft" wire:navigate>Cancel</a>
       <button wire:click="save" class="btn btn-primary" wire:loading.attr="disabled">
         @if ($saved)
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
