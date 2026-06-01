@@ -5,7 +5,7 @@ namespace App\Livewire\Seller;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.seller', data: ['active' => 'Wallet'])]
+#[Layout('layouts.seller', params: ['active' => 'Wallet'])]
 class Wallet extends Component
 {
     public function render()

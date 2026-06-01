@@ -6,7 +6,7 @@ use Illuminate\Support\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.seller', data: ['active' => 'Rack'])]
+#[Layout('layouts.seller', params: ['active' => 'Rack'])]
 class Dashboard extends Component
 {
     public string $activeTab = 'all'; // all | live | drafts | sold

@@ -5,7 +5,7 @@ namespace App\Livewire\Seller;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.seller', data: ['active' => 'Reviews'])]
+#[Layout('layouts.seller', params: ['active' => 'Reviews'])]
 class Reviews extends Component
 {
     public function render()

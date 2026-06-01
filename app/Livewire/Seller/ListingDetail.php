@@ -6,7 +6,7 @@ use App\Models\Listing;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.seller', data: ['active' => 'Rack'])]
+#[Layout('layouts.seller', params: ['active' => 'Rack'])]
 class ListingDetail extends Component
 {
     public Listing $listing;

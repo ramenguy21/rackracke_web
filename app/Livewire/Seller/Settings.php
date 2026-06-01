@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth as AuthFacade;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.seller', data: ['active' => 'Settings'])]
+#[Layout('layouts.seller', params: ['active' => 'Settings'])]
 class Settings extends Component
 {
     public string $shopName = '';

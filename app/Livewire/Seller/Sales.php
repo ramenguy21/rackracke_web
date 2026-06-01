@@ -6,7 +6,7 @@ use App\Models\Order;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-#[Layout('layouts.seller', data: ['active' => 'Sales'])]
+#[Layout('layouts.seller', params: ['active' => 'Sales'])]
 class Sales extends Component
 {
     public string $activeTab = 'cancelled'; // cancelled | transit | delivered
