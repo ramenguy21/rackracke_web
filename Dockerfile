@@ -50,7 +50,7 @@ RUN mkdir -p storage/framework/{sessions,views,cache/data} \
              bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-EXPOSE 8080
+EXPOSE ${PORT:-8080}
 
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
