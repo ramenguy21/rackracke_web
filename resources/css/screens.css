@@ -1,0 +1,118 @@
+/* ═══════════════════════════════════════════════════════════════════
+   RackRake — Screen-specific overrides extracted from Livewire views
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── Dashboard ────────────────────────────────────────────────────── */
+.tile-noimg {
+  width: 100%; height: 100%;
+  background: var(--paper-2);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--line-strong);
+}
+
+/* ── Photo upload grid ────────────────────────────────────────────── */
+.al2-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  background: white;
+  border-radius: var(--r-xl);
+  padding: 12px;
+  border: 1px solid var(--line);
+  margin-bottom: var(--s-5);
+}
+.al2-photo-grid .slot {
+  aspect-ratio: 1;
+  border-radius: 14px;
+  background: var(--paper-2);
+  overflow: hidden;
+  position: relative;
+  cursor: grab;
+  transition: box-shadow 0.15s ease;
+}
+.al2-photo-grid .slot:hover { box-shadow: var(--shadow-soft); }
+.al2-photo-grid .slot:active { cursor: grabbing; }
+.al2-photo-grid .slot.hero   { grid-column: span 2; grid-row: span 2; }
+.al2-photo-grid .slot img    { width: 100%; height: 100%; object-fit: cover; display: block; }
+.al2-photo-grid .slot .pin {
+  position: absolute; top: 8px; left: 8px;
+  background: var(--blue); color: white;
+  font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 3px 8px; border-radius: 999px; pointer-events: none;
+}
+.al2-photo-grid .slot .slot-actions {
+  position: absolute; top: 8px; right: 8px;
+  display: flex; gap: 4px;
+}
+.al2-photo-grid .slot .slot-rm {
+  width: 28px; height: 28px; border-radius: 999px;
+  background: rgba(10,10,15,0.72); color: white;
+  display: inline-flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(6px);
+  opacity: 0; transition: opacity 0.15s ease, transform 0.15s ease;
+  transform: scale(0.8);
+  border: none; cursor: pointer;
+}
+.al2-photo-grid .slot:hover .slot-rm { opacity: 1; transform: scale(1); }
+.al2-photo-grid .slot .slot-overlay {
+  position: absolute; inset: 0;
+  background: rgba(247,245,238,0.72);
+  display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(2px);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.slot-spinner {
+  width: 24px; height: 24px; border-radius: 999px;
+  border: 2px solid var(--line-strong);
+  border-top-color: var(--blue);
+  animation: spin 0.7s linear infinite;
+}
+.al2-photo-grid .slot.add {
+  background: white;
+  border: 1.5px dashed var(--line-strong);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px;
+  color: var(--muted); font-size: 11px; font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+.al2-photo-grid .slot.add:hover {
+  border-color: var(--blue); color: var(--blue);
+  background: rgba(0,3,255,0.025);
+}
+.sort-ghost { opacity: 0.3; border: 1.5px dashed var(--blue) !important; }
+
+/* ── Listing form compose ─────────────────────────────────────────── */
+.compose-price-row {
+  display: flex; align-items: baseline; gap: var(--s-3);
+}
+.field-error {
+  color: #B72A2A; font-size: 13px; margin-top: var(--s-1); line-height: 1.4; display: block;
+}
+
+/* ── Auth helpers ─────────────────────────────────────────────────── */
+.auth-field-error { color: #B72A2A; font-size: 13px; display: block; margin-top: 4px; }
+.auth-back-link {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 13px; color: var(--muted); margin: 0 auto;
+  transition: color 0.15s ease; background: none; border: none; cursor: pointer;
+  padding: 0;
+}
+.auth-back-link:hover { color: var(--ink); }
+
+/* ── Onboarding helpers ───────────────────────────────────────────── */
+.onb2-error  { color: #B72A2A; font-size: 13.5px; margin-top: var(--s-2); }
+.onb2-tip    { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; margin-top: var(--s-4); }
+.onb2-fields { display: flex; flex-direction: column; gap: var(--s-4); margin-top: var(--s-2); }
+.onb2-fields .field-hint { font-size: 12px; color: var(--muted); margin-top: 4px; display: block; }
+.onb2-city .city-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.onb2-city.on .city-sub { color: rgba(255,255,255,0.6); }
+
+/* ── Responsive ───────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .al2-photo-grid { grid-template-columns: repeat(3, 1fr); padding: 8px; }
+}
+@media (max-width: 400px) {
+  .al2-photo-grid { grid-template-columns: repeat(2, 1fr); }
+  .al2-photo-grid .slot.hero { grid-column: auto; grid-row: auto; }
+}

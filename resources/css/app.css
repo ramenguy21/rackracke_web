@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+@import './rackrake.css';
+@import './animations.css';
+@import './screens.css';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../../vendor/filament/**/*.blade.php';
+
+@theme {
+    --font-sans: 'Bricolage Grotesque', system-ui, sans-serif;
+    --font-serif: 'Instrument Serif', serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --font-logo: 'League Spartan', system-ui, sans-serif;
+
+    --color-brand:   #0003FF;
+    --color-yellow:  #FFDE59;
+    --color-ink:     #0A0A0F;
+    --color-ink-2:   #1C1C24;
+    --color-paper:   #F7F5EE;
+    --color-paper-2: #EEEBE0;
+}
