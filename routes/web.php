@@ -4,8 +4,11 @@ use App\Livewire\Seller;
 use App\Livewire\Seller\Login;
 use Illuminate\Support\Facades\Route;
 
-// Root → seller auth
-Route::get('/', fn () => redirect()->route('seller.auth'));
+// Root → dashboard if logged in, login if not
+Route::get('/', fn () => auth('seller')->check()
+    ? redirect()->route('seller.dashboard')
+    : redirect()->route('seller.auth')
+);
 
 // ── Seller auth (guest-only) ────────────────────────────────────────────────
 Route::middleware('guest:seller')->prefix('seller')->name('seller.')->group(function () {

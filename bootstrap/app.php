@@ -15,6 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Trust Railway's reverse proxy so HTTPS URLs are generated correctly
         $middleware->trustProxies(at: '*');
+
+        // auth:seller → redirect unauthenticated users to seller login
+        $middleware->redirectGuestsTo(fn () => route('seller.auth'));
+
+        // guest:seller → redirect already-authenticated sellers to dashboard
+        $middleware->redirectUsersTo(fn () => route('seller.dashboard'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
