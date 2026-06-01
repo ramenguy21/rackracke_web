@@ -52,9 +52,7 @@ RUN mkdir -p storage/framework/{sessions,views,cache/data} \
 
 EXPOSE 8080
 
-# config:cache runs at startup so Railway's env vars are available when it bakes
-CMD php artisan migrate --force \
-    && php artisan storage:link --force \
-    && php artisan config:cache \
-    && php artisan view:cache \
-    && php artisan serve --host=0.0.0.0 --port=8080
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+CMD ["/start.sh"]
