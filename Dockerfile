@@ -33,5 +33,7 @@ RUN npm run build \
 RUN mkdir -p storage/framework/{sessions,views,cache/data} bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+EXPOSE 8080
+
 ENTRYPOINT []
-CMD ["php", "-r", "echo 'container ok\n';"]
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
