@@ -1,38 +1,63 @@
 FROM php:8.4-cli-alpine
 
-# System deps
+# All system libs required by the PHP extensions we install below
 RUN apk add --no-cache \
+    # pdo_pgsql / pgsql
     postgresql-dev \
+    # mbstring
+    oniguruma-dev \
+    # gd
     libpng-dev \
+    freetype-dev \
+    libjpeg-turbo-dev \
+    # zip
     libzip-dev \
     zip \
     unzip \
+    # Node / npm for Vite
     nodejs \
     npm \
-    curl \
-    && docker-php-ext-install pdo_pgsql pgsql mbstring zip gd bcmath
+    # misc
+    curl
 
-# Composer
+# Build and install PHP extensions
+RUN docker-php-ext-configure gd \
+        --with-freetype \
+        --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_pgsql \
+        pgsql \
+        mbstring \
+        zip \
+        gd \
+        bcmath
+
+# Composer from official image
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
 
-# Install PHP deps
+# PHP deps (layer-cached separately from source)
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-scripts
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer install \
+        --no-dev \
+        --optimize-autoloader \
+        --no-scripts
 
-# Install JS deps and build assets
+# JS deps
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# Copy source and build
 COPY . .
 
 RUN npm run build \
-    && composer dump-autoload --optimize \
+    && COMPOSER_ALLOW_SUPERUSER=1 composer dump-autoload --optimize \
     && php artisan package:discover --ansi
 
-# Storage permissions
-RUN mkdir -p storage/framework/{sessions,views,cache} \
+# Storage dirs
+RUN mkdir -p storage/framework/{sessions,views,cache/data} \
+             bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
 EXPOSE 8080
