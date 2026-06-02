@@ -24,7 +24,7 @@ class Onboarding extends Component
 
     public function updatedShopName(string $value): void
     {
-        $this->handle = '@' . Str::slug($value, '');
+        $this->handle = '@' . Str::slug($value);
     }
 
     public function nextStep(): void

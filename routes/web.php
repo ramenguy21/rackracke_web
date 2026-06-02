@@ -2,7 +2,9 @@
 
 use App\Livewire\Seller;
 use App\Livewire\Seller\Login;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 // Root → dashboard if logged in, login if not
 Route::get('/', fn () => auth('seller')->check()
@@ -30,4 +32,9 @@ Route::middleware('auth:seller')->prefix('seller')->name('seller.')->group(funct
     Route::get('/listings/new',        Seller\ListingForm::class)->name('listings.create');
     Route::get('/listings/{listing}',  Seller\ListingDetail::class)->name('listings.show');
     Route::get('/listings/{listing}/edit', Seller\ListingForm::class)->name('listings.edit');
+    Route::post('/listings/upload-photo', function (Request $request) {
+        $request->validate(['photo' => 'required|image|max:10240']);
+        $path = $request->file('photo')->store('listings', 's3');
+        return response()->json(['url' => Storage::disk('s3')->url($path), 'path' => $path]);
+    })->name('listings.upload-photo');
 });

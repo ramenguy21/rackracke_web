@@ -5,12 +5,10 @@ namespace App\Livewire\Seller;
 use App\Models\Listing;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
-use Livewire\WithFileUploads;
 
 #[Layout('layouts.seller-bare')]
 class ListingForm extends Component
 {
-    use WithFileUploads;
 
     public ?Listing $listing = null;
 
@@ -20,7 +18,6 @@ class ListingForm extends Component
     public string $price       = '';
     public string $category    = '';
     public array  $photos      = [];  // stored paths after upload
-    public array  $tempPhotos  = [];  // Livewire TemporaryUploadedFile[]
 
     public int $commissionPct = 8;
 
@@ -37,25 +34,10 @@ class ListingForm extends Component
         }
     }
 
-    // Called by Alpine when user picks/drops photos — uploads them
-    public function updatedTempPhotos(): void
+    // Called from Alpine to sync photo paths (order/removal/new uploads)
+    public function setPhotos(array $paths): void
     {
-        foreach ($this->tempPhotos as $photo) {
-            $path = $photo->store('listings', 'public');
-            $this->photos[] = $path;
-        }
-        $this->tempPhotos = [];
-    }
-
-    // Called from Alpine via dispatch to sync photo order/removal
-    public function setPhotos(array $urls): void
-    {
-        // Convert Storage URLs back to paths
-        $base = rtrim(\Illuminate\Support\Facades\Storage::url(''), '/');
-        $this->photos = array_values(array_map(
-            fn($url) => ltrim(str_replace($base, '', $url), '/'),
-            $urls
-        ));
+        $this->photos = array_values($paths);
     }
 
     public function netAmount(): int

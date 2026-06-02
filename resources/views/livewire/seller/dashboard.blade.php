@@ -146,7 +146,7 @@
           <a href="{{ route('seller.listings.show', $listing) }}" class="tile2" wire:navigate>
             <div class="img">
               @if (!empty($listing->photos))
-                <img src="{{ Storage::url($listing->photos[0]) }}" alt="{{ $listing->title }}" loading="lazy">
+                <img src="{{ Storage::disk('s3')->url($listing->photos[0]) }}" alt="{{ $listing->title }}" loading="lazy">
               @else
                 <div class="tile-noimg">
                   <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>

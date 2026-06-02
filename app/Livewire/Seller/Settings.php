@@ -13,13 +13,16 @@ class Settings extends Component
     public string $bio = '';
     public string $phone = '';
     public bool $saved = false;
+    public bool $showPayoutSheet = false;
+    public string $payoutInput = '';
 
     public function mount(): void
     {
         $seller = auth('seller')->user();
-        $this->shopName = $seller->shop_name;
-        $this->bio      = $seller->bio ?? '';
-        $this->phone    = $seller->phone;
+        $this->shopName    = $seller->shop_name;
+        $this->bio         = $seller->bio ?? '';
+        $this->phone       = $seller->phone;
+        $this->payoutInput = $seller->payout_method ?? '';
     }
 
     public function save(): void
@@ -39,12 +42,19 @@ class Settings extends Component
         $this->dispatch('saved');
     }
 
+    public function savePayout(): void
+    {
+        $this->validate(['payoutInput' => 'required|string|max:200']);
+        auth('seller')->user()->update(['payout_method' => $this->payoutInput]);
+        $this->showPayoutSheet = false;
+    }
+
     public function logout(): void
     {
         AuthFacade::guard('seller')->logout();
         session()->invalidate();
         session()->regenerateToken();
-        $this->redirect(route('seller.auth'), navigate: true);
+        $this->redirect(route('seller.auth'));
     }
 
     public function render()

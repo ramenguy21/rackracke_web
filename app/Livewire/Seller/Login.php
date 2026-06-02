@@ -22,11 +22,21 @@ class Login extends Component
     {
         $this->mode = $mode;
         $this->step = $step;
+        $this->email = '';
+        $this->password = '';
+        $this->resetErrorBag();
+    }
+
+    public function goBack(): void
+    {
+        $this->password = '';
+        $this->step = 1;
         $this->resetErrorBag();
     }
 
     public function nextStep(): void
     {
+        $this->validate(['email' => 'required|email']);
         $this->step++;
     }
 

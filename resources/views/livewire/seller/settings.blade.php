@@ -21,7 +21,7 @@
         <div class="ro-field">
           <span class="ro-label">Handle</span>
           <div class="ro-value">
-            <span class="ro-text mono">rackrake.com/@{{ \Illuminate\Support\Str::slug($seller->shop_name, '') }}</span>
+            <span class="ro-text mono">rackrake.com/@{{ \Illuminate\Support\Str::slug($seller->shop_name) }}</span>
             <span class="ro-lock">
               <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
               Set by rackrake
@@ -80,24 +80,55 @@
       <h4>Payout</h4>
       @if ($seller->payout_method)
         <div class="payout-method">
-          <div class="bank-mark">HBL</div>
+          <div class="bank-mark">Bank</div>
           <div class="meta">
             <div class="title">{{ $seller->payout_method }}</div>
-            <div class="sub">Auto-deposited every Friday</div>
+            <div class="sub">Paid out by rackrake team</div>
           </div>
-          <a href="#" class="btn btn-soft btn-sm">Change</a>
+          <button wire:click="$set('showPayoutSheet', true)" class="btn btn-soft btn-sm">Change</button>
         </div>
       @else
-        <p class="settings-note">No payout method added yet. Add one so we can send you what you've earned.</p>
-        <a href="#" class="btn btn-ghost btn-sm">
+        <p class="settings-note">No payout details added yet. Add them so we can pay you what you've earned.</p>
+        <button wire:click="$set('showPayoutSheet', true)" class="btn btn-ghost btn-sm">
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           Add bank account
-        </a>
+        </button>
       @endif
       <p style="font-size:13px;color:var(--muted);margin-top:var(--s-3)">
         Platform fee · set by rackrake — <strong>8%</strong>
       </p>
     </div>
+
+    {{-- ── Payout sheet ──────────────────────────────────────────────── --}}
+    @if ($showPayoutSheet)
+      <div class="sheet-backdrop" wire:click="$set('showPayoutSheet', false)">
+        <div class="sheet" wire:click.stop>
+          <div class="sheet-handle"></div>
+          <h3>Payout <span class="it">details</span></h3>
+          <p style="font-size:14px;color:var(--muted);margin:var(--s-3) 0 var(--s-5)">
+            Enter your bank account details below. The rackrake team will use these to transfer your earnings.
+          </p>
+          <div class="field" style="margin-bottom:var(--s-4)">
+            <label>Account details</label>
+            <textarea
+              wire:model="payoutInput"
+              class="textarea"
+              rows="3"
+              placeholder="e.g. HBL · 01234567890 · Muhammad Ali"
+              autofocus
+            ></textarea>
+            @error('payoutInput') <span style="color:#B72A2A;font-size:13px">{{ $message }}</span> @enderror
+          </div>
+          <div class="row" style="gap:var(--s-3)">
+            <button class="btn btn-soft" style="flex:1" wire:click="$set('showPayoutSheet', false)">Cancel</button>
+            <button class="btn btn-primary" style="flex:1" wire:click="savePayout" wire:loading.attr="disabled">
+              <span wire:loading.remove wire:target="savePayout">Save</span>
+              <span wire:loading wire:target="savePayout">Saving…</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    @endif
 
     {{-- ── Help ──────────────────────────────────────────────────────── --}}
     <div class="settings-card">
