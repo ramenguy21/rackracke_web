@@ -114,6 +114,43 @@
         <p class="pd2-desc">{{ $listing->description }}</p>
       @endif
 
+      {{-- Buyer & shop links (live listings only) --}}
+      @if ($listing->status === 'live' && $listing->collection_handle)
+        @php
+          $shopUrl    = 'https://rackrake.shop/collections/' . $listing->collection_handle;
+          $productUrl = $listing->shopify_product_id
+              ? 'https://rackrake.shop/collections/' . $listing->collection_handle
+              : null;
+        @endphp
+        <div class="pd2-buyerlink" style="margin-bottom:var(--s-4)">
+          <div class="head">
+            <span class="lab">Live on rackrake.shop</span>
+          </div>
+          <div class="row" style="gap:var(--s-3);margin-top:var(--s-3);flex-wrap:wrap">
+            <a href="{{ $shopUrl }}" target="_blank" rel="noopener" class="btn btn-soft btn-sm">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+              View buyer page
+            </a>
+            <button
+              class="btn btn-ghost btn-sm"
+              x-data
+              @click="navigator.clipboard.writeText('{{ $shopUrl }}').then(() => { $el.textContent = 'Copied!'; setTimeout(() => $el.textContent = 'Copy link', 1500) })"
+            >Copy link</button>
+          </div>
+          <span style="font-size:12px;color:var(--muted);margin-top:6px;display:block">
+            Share your shop: <strong>rackrake.shop/collections/{{ $listing->collection_handle }}</strong>
+          </span>
+        </div>
+      @elseif ($listing->status === 'live' && !$listing->collection_handle)
+        <div class="pd2-status-banner" style="background:rgba(0,3,255,0.04);border-color:rgba(0,3,255,0.12)">
+          <svg width="16" height="16" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="meta">
+            <strong>Link not set yet</strong>
+            <span>Ask the rackrake team to link your Shopify product so you can share the buyer page.</span>
+          </div>
+        </div>
+      @endif
+
       {{-- Pending review notice --}}
       @if ($listing->status === 'pending_review')
         <div class="pd2-status-banner">

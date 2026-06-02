@@ -140,16 +140,51 @@
       </div>
     @endif
 
-    <p class="auth2-meta">
+    <p class="auth2-meta" x-data="{ termsOpen: false }">
       We make money only when you do.<br>
-      By continuing you accept our <a href="#">Seller Terms</a>.
+      By continuing you accept our
+      <button @click="termsOpen = true" style="color:var(--blue);font-weight:600;text-decoration:underline;font-size:inherit">Seller Terms</button>.
+
+      {{-- Terms modal --}}
+      <template x-if="termsOpen">
+        <div class="sheet-backdrop" @click="termsOpen = false" style="z-index:300">
+          <div class="sheet" @click.stop style="max-height:80vh;overflow-y:auto">
+            <div class="sheet-handle"></div>
+            <h3>Seller <span class="it">Terms</span></h3>
+            <div style="font-size:14px;color:var(--ink);line-height:1.65;margin-top:var(--s-4)">
+              <p style="margin-bottom:var(--s-3)">Full terms coming soon. By selling on rackrake you agree to the following:</p>
+              <ul style="padding-left:var(--s-5);display:flex;flex-direction:column;gap:var(--s-2)">
+                <li>You are the rightful owner of all items you list.</li>
+                <li>Items must be accurately described and photographed.</li>
+                <li>rackrake charges an 8% platform fee per completed sale.</li>
+                <li>Payouts are processed by the rackrake team after each sale is settled.</li>
+                <li>rackrake reserves the right to remove listings that violate our guidelines.</li>
+              </ul>
+              <p style="margin-top:var(--s-4);color:var(--muted);font-size:13px">Full legal terms will be published at rackrake.shop/terms. For any questions contact rackrakeapp@gmail.com</p>
+            </div>
+            <button class="btn btn-primary" style="width:100%;margin-top:var(--s-5)" @click="termsOpen = false">Got it</button>
+          </div>
+        </div>
+      </template>
     </p>
 
-    {{-- New seller link --}}
-    <p style="text-align:center;font-size:13px;margin-top:var(--s-4)">
-      No account yet?
-      <a href="{{ route('seller.onboarding') }}" style="color:var(--blue);font-weight:600" wire:navigate>Create your shop →</a>
-    </p>
+    {{-- New seller CTA --}}
+    @if ($mode === 'oauth')
+      <div style="margin-top:var(--s-5);padding-top:var(--s-5);border-top:1px solid var(--line)">
+        <p style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:var(--s-3)">New to rackrake?</p>
+        <a href="{{ route('seller.onboarding') }}"
+           class="oauth-btn"
+           style="background:var(--yellow);color:var(--ink);border-color:transparent;font-weight:700"
+           wire:navigate>
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Create your shop — it's free
+        </a>
+      </div>
+    @else
+      <p style="text-align:center;font-size:13px;margin-top:var(--s-4)">
+        No account? <a href="{{ route('seller.onboarding') }}" style="color:var(--blue);font-weight:600" wire:navigate>Create your shop →</a>
+      </p>
+    @endif
 
   </div>
 </div>

@@ -15,8 +15,9 @@ class Onboarding extends Component
     public int $step = 1;
     public int $totalSteps = 3;
 
-    public string $shopName = '';
-    public string $handle   = '';
+    public string $shopName       = '';
+    public string $handle         = '';
+    public bool   $handleAvailable = true;
     public string $city     = '';
     public string $phone    = '';
     public string $email    = '';
@@ -24,7 +25,11 @@ class Onboarding extends Component
 
     public function updatedShopName(string $value): void
     {
-        $this->handle = '@' . Str::slug($value);
+        $slug = Str::slug($value);
+        $this->handle          = '@' . $slug;
+        $this->handleAvailable = $value === ''
+            ? true
+            : !Seller::whereRaw('LOWER(shop_name) = ?', [strtolower($value)])->exists();
     }
 
     public function nextStep(): void

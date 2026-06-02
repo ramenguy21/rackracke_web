@@ -29,7 +29,12 @@
       >
       @if ($shopName)
         <div class="onb2-handle-hint">
-          rackrake.com/{{ $handle }}<span class="check"> · available</span>
+          rackrake.shop/{{ $handle }}
+          @if ($handleAvailable)
+            <span class="check"> · available</span>
+          @else
+            <span style="color:#B72A2A"> · taken</span>
+          @endif
         </div>
       @endif
       @error('shopName') <p class="onb2-error">{{ $message }}</p> @enderror
