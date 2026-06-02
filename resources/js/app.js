@@ -31,7 +31,6 @@ document.addEventListener('alpine:init', () => {
             for (const file of imageFiles) {
                 const id = crypto.randomUUID()
                 const blobUrl = URL.createObjectURL(file)
-                // Push first so the slot appears immediately with a spinner
                 this.photos.push({ id, url: blobUrl, serverPath: null, uploading: true, error: null })
 
                 try {
@@ -43,7 +42,6 @@ document.addEventListener('alpine:init', () => {
                     const data = await res.json()
 
                     URL.revokeObjectURL(blobUrl)
-                    // Mutate through the reactive proxy (this.photos[idx]) not the original reference
                     const idx = this.photos.findIndex(p => p.id === id)
                     if (idx !== -1) {
                         this.photos[idx].url = data.url
@@ -58,9 +56,13 @@ document.addEventListener('alpine:init', () => {
                         this.photos[idx].error = true
                     }
                 }
-
-                this.syncPhotos()
+                // NOTE: do NOT call syncPhotos() here — calling it per-upload causes
+                // concurrent Livewire requests that race each other and overwrite the
+                // photos array with a partial list. Sync once after all uploads finish.
             }
+
+            // Single sync after all files are processed — no race condition
+            this.syncPhotos()
         },
 
         remove(id) {

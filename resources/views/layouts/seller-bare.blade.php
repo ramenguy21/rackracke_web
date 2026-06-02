@@ -14,11 +14,16 @@
   @stack('styles')
   @livewireStyles
   <style>
-    .rr-progress-bar { position:fixed;top:0;left:0;z-index:9999;height:2px;background:var(--blue);transition:width .3s ease;width:0;pointer-events:none; }
+    .rr-progress-bar { position:fixed;top:0;left:0;z-index:9999;height:3px;background:var(--blue);transition:width .3s ease;width:0;pointer-events:none;box-shadow:0 0 8px rgba(0,3,255,0.4); }
+    .rr-spinner-overlay { position:fixed;inset:0;z-index:9990;background:rgba(247,245,238,0.55);display:none;align-items:center;justify-content:center;backdrop-filter:blur(1px); }
+    .rr-spinner { width:28px;height:28px;border:3px solid rgba(0,3,255,0.15);border-top-color:var(--blue);border-radius:50%;animation:spin .65s linear infinite; }
   </style>
 </head>
 <body>
   <div class="rr-progress-bar" wire:loading.style="width:70%" wire:loading.delay.shortest></div>
+  <div class="rr-spinner-overlay" wire:loading.style="display:flex" wire:loading.delay="400">
+    <div class="rr-spinner"></div>
+  </div>
   {{ $slot }}
   @livewireScripts
 </body>

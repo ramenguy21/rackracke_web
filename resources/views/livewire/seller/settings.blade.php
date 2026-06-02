@@ -101,7 +101,9 @@
 
     {{-- ── Payout sheet ──────────────────────────────────────────────── --}}
     @if ($showPayoutSheet)
-      <div class="sheet-backdrop" wire:click="$set('showPayoutSheet', false)">
+      <div class="sheet-backdrop"
+           x-data="{ init() { document.body.style.overflow = 'hidden'; this.$cleanup(() => { document.body.style.overflow = '' }) } }"
+           wire:click="$set('showPayoutSheet', false)">
         <div class="sheet" wire:click.stop>
           <div class="sheet-handle"></div>
           <h3>Payout <span class="it">details</span></h3>
