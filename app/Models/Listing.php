@@ -22,6 +22,7 @@ class Listing extends Model
         'shopify_product_id',
         'collection_handle',
         'status',
+        'rejection_note',
     ];
 
     protected function casts(): array

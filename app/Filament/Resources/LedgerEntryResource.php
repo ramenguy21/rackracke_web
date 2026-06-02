@@ -8,7 +8,11 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\Summarizers\Sum;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Filters\SelectFilter;
+use Illuminate\Database\Eloquent\Collection;
 
 class LedgerEntryResource extends Resource
 {
@@ -32,10 +36,16 @@ class LedgerEntryResource extends Resource
                 TextColumn::make('amount_owed_pkr')
                     ->label('Amount owed')
                     ->formatStateUsing(fn ($state) => 'Rs. ' . number_format($state))
-                    ->sortable(),
+                    ->sortable()
+                    ->summarize(
+                        Sum::make()
+                            ->label('Total')
+                            ->formatStateUsing(fn ($state) => 'Rs. ' . number_format($state ?? 0))
+                    ),
                 TextColumn::make('status')
                     ->badge()
-                    ->color(fn ($state) => $state === 'paid_out' ? 'success' : 'warning'),
+                    ->color(fn ($state) => $state === 'paid_out' ? 'success' : 'warning')
+                    ->formatStateUsing(fn ($state) => $state === 'paid_out' ? 'Paid out' : 'Owed'),
                 TextColumn::make('credited_at')
                     ->label('Credited')
                     ->dateTime('M j, Y')
@@ -46,6 +56,15 @@ class LedgerEntryResource extends Resource
                     ->placeholder('—'),
             ])
             ->defaultSort('credited_at', 'desc')
+            ->filters([
+                SelectFilter::make('status')
+                    ->options(['owed' => 'Owed', 'paid_out' => 'Paid out'])
+                    ->default('owed'),
+                SelectFilter::make('seller')
+                    ->relationship('seller', 'shop_name')
+                    ->searchable()
+                    ->preload(),
+            ])
             ->actions([
                 Action::make('mark_paid_out')
                     ->label('Mark paid out')
@@ -54,9 +73,27 @@ class LedgerEntryResource extends Resource
                     ->visible(fn (LedgerEntry $entry) => $entry->isOwed())
                     ->requiresConfirmation()
                     ->action(fn (LedgerEntry $entry) => $entry->update([
-                        'status'     => 'paid_out',
+                        'status'      => 'paid_out',
                         'paid_out_at' => now(),
                     ])),
+            ])
+            ->bulkActions([
+                BulkAction::make('bulk_mark_paid_out')
+                    ->label('Mark all paid out')
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Mark selected entries as paid out?')
+                    ->modalDescription('This records that the seller has been paid. This cannot be undone.')
+                    ->action(function (Collection $records) {
+                        $records
+                            ->filter(fn (LedgerEntry $e) => $e->isOwed())
+                            ->each(fn (LedgerEntry $e) => $e->update([
+                                'status'      => 'paid_out',
+                                'paid_out_at' => now(),
+                            ]));
+                    })
+                    ->deselectRecordsAfterCompletion(),
             ]);
     }
 

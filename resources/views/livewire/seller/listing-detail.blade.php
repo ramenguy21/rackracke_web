@@ -125,6 +125,17 @@
         </div>
       @endif
 
+      {{-- Rejection note (shown when listing is returned to draft) --}}
+      @if ($listing->status === 'draft' && $listing->rejection_note)
+        <div class="pd2-status-banner" style="background:rgba(183,42,42,0.06);border-color:rgba(183,42,42,0.2)">
+          <svg width="16" height="16" fill="none" stroke="#B72A2A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <div class="meta">
+            <strong style="color:#B72A2A">Changes needed</strong>
+            <span>{{ $listing->rejection_note }}</span>
+          </div>
+        </div>
+      @endif
+
     </div>
 
     {{-- Actions --}}

@@ -32,6 +32,9 @@ abstract class OrderState extends State
             ->allowTransition(ProcurementFailed::class, Refunded::class, Transitions\ToRefunded::class)
 
             // ── COD branch ──────────────────────────────────────────────
+            // Placed → Cancelled (admin cancels before procuring, either payment type)
+            ->allowTransition(Placed::class, Cancelled::class, Transitions\ToCancelled::class)
+
             // Placed → CodConfirm
             ->allowTransition(Placed::class, CodConfirm::class, Transitions\ToCodConfirm::class)
 
