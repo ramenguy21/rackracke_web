@@ -35,10 +35,7 @@ return [
         ],
     ],
 
-    'shopify' => [
-        'store_domain'   => env('SHOPIFY_STORE_DOMAIN'),
-        'admin_token'    => env('SHOPIFY_ADMIN_API_TOKEN'),
-        'webhook_secret' => env('SHOPIFY_WEBHOOK_SECRET'),
-    ],
+    // Shopify Admin API integration removed — manual workflow via admin panel.
+    // Re-add when Shopify credentials are available. See ops.md.
 
 ];

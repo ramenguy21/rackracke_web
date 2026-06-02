@@ -4,7 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ListingResource\Pages;
 use App\Models\Listing;
-use App\Services\ShopifyService;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -13,7 +14,6 @@ use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Filters\SelectFilter;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ListingResource extends Resource
@@ -55,6 +55,11 @@ class ListingResource extends Resource
                         'withdrawn'      => 'danger',
                         default          => 'gray',
                     }),
+                TextColumn::make('shopify_product_id')
+                    ->label('Shopify ID')
+                    ->placeholder('—')
+                    ->copyable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('rejection_note')
                     ->label('Rejection note')
                     ->limit(40)
@@ -74,32 +79,17 @@ class ListingResource extends Resource
                     ]),
             ])
             ->actions([
-                // Approve + push to Shopify
+                // Approve → marks live in portal. Then manually add to Shopify + link ID below.
                 Action::make('approve')
-                    ->label('Approve & push live')
+                    ->label('Approve')
                     ->color('success')
-                    ->icon('heroicon-o-arrow-up-tray')
+                    ->icon('heroicon-o-check-circle')
                     ->visible(fn (Listing $l) => $l->status === 'pending_review')
                     ->requiresConfirmation()
+                    ->modalDescription('This will mark the listing as live. Then manually create the product in Shopify and link the Shopify product ID using "Link Shopify ID".')
                     ->action(function (Listing $listing) {
-                        try {
-                            app(ShopifyService::class)->pushListing($listing);
-                            $listing->update(['status' => 'live', 'rejection_note' => null]);
-                            Notification::make()
-                                ->title('Pushed to Shopify and set live')
-                                ->success()
-                                ->send();
-                        } catch (\Throwable $e) {
-                            Log::error('Shopify push failed', [
-                                'listing_id' => $listing->id,
-                                'error'      => $e->getMessage(),
-                            ]);
-                            Notification::make()
-                                ->title('Shopify push failed')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
+                        $listing->update(['status' => 'live', 'rejection_note' => null]);
+                        Notification::make()->title('Listing approved and set live')->success()->send();
                     }),
 
                 // Reject back to seller with a note
@@ -109,72 +99,64 @@ class ListingResource extends Resource
                     ->icon('heroicon-o-x-circle')
                     ->visible(fn (Listing $l) => $l->status === 'pending_review')
                     ->form([
-                        \Filament\Forms\Components\Textarea::make('rejection_note')
+                        Textarea::make('rejection_note')
                             ->label('Rejection note for seller')
-                            ->helperText('The seller will see this message on their listing page.')
+                            ->helperText('The seller will see this on their listing page.')
                             ->required()
                             ->rows(3),
                     ])
                     ->action(function (Listing $listing, array $data) {
-                        $listing->update([
-                            'status'         => 'draft',
-                            'rejection_note' => $data['rejection_note'],
-                        ]);
-                        Notification::make()
-                            ->title('Listing rejected')
-                            ->body('Seller will see the rejection note.')
-                            ->warning()
-                            ->send();
+                        $listing->update(['status' => 'draft', 'rejection_note' => $data['rejection_note']]);
+                        Notification::make()->title('Listing rejected')->warning()->send();
                     }),
 
-                // Withdraw a live listing (archives on Shopify)
+                // Link Shopify product ID after manually creating it in Shopify
+                Action::make('link_shopify')
+                    ->label('Link Shopify ID')
+                    ->icon('heroicon-o-link')
+                    ->color('gray')
+                    ->visible(fn (Listing $l) => $l->status === 'live')
+                    ->form([
+                        TextInput::make('shopify_product_id')
+                            ->label('Shopify product ID')
+                            ->helperText('Copy from the Shopify admin product URL: /products/{id}')
+                            ->required(),
+                        TextInput::make('collection_handle')
+                            ->label('Collection handle')
+                            ->helperText('The seller\'s collection handle on Shopify (e.g. studio-karma)'),
+                    ])
+                    ->fillForm(fn (Listing $l) => [
+                        'shopify_product_id' => $l->shopify_product_id,
+                        'collection_handle'  => $l->collection_handle,
+                    ])
+                    ->action(function (Listing $listing, array $data) {
+                        $listing->update([
+                            'shopify_product_id' => $data['shopify_product_id'] ?: null,
+                            'collection_handle'  => $data['collection_handle'] ?: null,
+                        ]);
+                        Notification::make()->title('Shopify product linked')->success()->send();
+                    }),
+
+                // Withdraw a live listing
                 Action::make('withdraw')
                     ->label('Withdraw')
                     ->color('danger')
                     ->icon('heroicon-o-archive-box')
                     ->visible(fn (Listing $l) => $l->status === 'live')
                     ->requiresConfirmation()
+                    ->modalDescription('This marks the listing as withdrawn in the portal. Remember to also archive the product in Shopify manually.')
                     ->action(function (Listing $listing) {
-                        try {
-                            app(ShopifyService::class)->withdrawListing($listing);
-                        } catch (\Throwable $e) {
-                            Log::error('Shopify withdraw failed', [
-                                'listing_id' => $listing->id,
-                                'error'      => $e->getMessage(),
-                            ]);
-                        }
                         $listing->update(['status' => 'withdrawn']);
-                        Notification::make()
-                            ->title('Listing withdrawn')
-                            ->success()
-                            ->send();
+                        Notification::make()->title('Listing withdrawn — archive in Shopify manually')->warning()->send();
                     }),
             ])
             ->headerActions([
-                Action::make('register_shopify_webhook')
-                    ->label('Register Shopify webhook')
-                    ->icon('heroicon-o-link')
+                Action::make('export_csv')
+                    ->label('Export CSV')
+                    ->icon('heroicon-o-arrow-down-tray')
                     ->color('gray')
-                    ->requiresConfirmation()
-                    ->modalHeading('Register orders/paid webhook')
-                    ->modalDescription('This registers the orders/paid webhook on Shopify pointing at this app. Safe to run multiple times — it checks for duplicates first.')
-                    ->action(function () {
-                        try {
-                            $address = url('/api/webhooks/shopify/orders-paid');
-                            $result  = app(ShopifyService::class)->registerWebhook($address);
-                            Notification::make()
-                                ->title('Webhook registered (ID: ' . ($result['id'] ?? 'existing') . ')')
-                                ->success()
-                                ->send();
-                        } catch (\Throwable $e) {
-                            Log::error('Shopify webhook registration failed', ['error' => $e->getMessage()]);
-                            Notification::make()
-                                ->title('Webhook registration failed')
-                                ->body($e->getMessage())
-                                ->danger()
-                                ->send();
-                        }
-                    }),
+                    ->url(route('admin.export.listings'))
+                    ->openUrlInNewTab(),
             ]);
     }
 

@@ -77,6 +77,14 @@ class LedgerEntryResource extends Resource
                         'paid_out_at' => now(),
                     ])),
             ])
+            ->headerActions([
+                Action::make('export_csv')
+                    ->label('Export CSV')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('gray')
+                    ->url(route('admin.export.ledger'))
+                    ->openUrlInNewTab(),
+            ])
             ->bulkActions([
                 BulkAction::make('bulk_mark_paid_out')
                     ->label('Mark all paid out')

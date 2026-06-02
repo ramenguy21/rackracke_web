@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\OrderResource\Pages;
+use App\Models\Listing;
 use App\Models\Order;
 use App\States\Order\Cancelled;
 use App\States\Order\CodConfirm;
@@ -13,6 +14,9 @@ use App\States\Order\Placed;
 use App\States\Order\Procuring;
 use App\States\Order\ReturnedToSeller;
 use App\States\Order\Settled;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -77,6 +81,11 @@ class OrderResource extends Resource
                 TextColumn::make('sale_price_pkr')
                     ->label('Sale price')
                     ->formatStateUsing(fn ($state) => 'Rs. ' . number_format($state)),
+                TextColumn::make('shopify_order_id')
+                    ->label('Shopify order')
+                    ->placeholder('—')
+                    ->copyable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Placed')
                     ->since()
@@ -103,19 +112,79 @@ class OrderResource extends Resource
                 SelectFilter::make('payment_type')
                     ->options(['prepaid' => 'Prepaid', 'cod' => 'COD']),
             ])
+            ->headerActions([
+                // Manually create an order from a Shopify sale
+                Action::make('create_order')
+                    ->label('Record order')
+                    ->icon('heroicon-o-plus-circle')
+                    ->color('primary')
+                    ->form([
+                        Select::make('listing_id')
+                            ->label('Listing (must be Live)')
+                            ->options(
+                                Listing::where('status', 'live')
+                                    ->with('seller')
+                                    ->get()
+                                    ->mapWithKeys(fn ($l) => [$l->id => "{$l->seller->shop_name} — {$l->title} (Rs. " . number_format($l->price_pkr) . ')'])
+                            )
+                            ->searchable()
+                            ->required(),
+                        Select::make('payment_type')
+                            ->options(['prepaid' => 'Prepaid', 'cod' => 'COD'])
+                            ->required(),
+                        TextInput::make('sale_price_pkr')
+                            ->label('Sale price (PKR)')
+                            ->numeric()
+                            ->required()
+                            ->helperText('Copy from Shopify order. Must match exactly.'),
+                        TextInput::make('take_rate_pct')
+                            ->label('Commission %')
+                            ->numeric()
+                            ->default(8)
+                            ->required(),
+                        TextInput::make('buyer_contact')
+                            ->label('Buyer phone / email')
+                            ->helperText('From Shopify order customer details'),
+                        TextInput::make('shopify_order_id')
+                            ->label('Shopify order ID')
+                            ->helperText('From the Shopify order URL — used for reconciliation'),
+                    ])
+                    ->action(function (array $data) {
+                        $listing = Listing::findOrFail($data['listing_id']);
+
+                        Order::create([
+                            'listing_id'       => $listing->id,
+                            'shopify_order_id' => $data['shopify_order_id'] ?: null,
+                            'payment_type'     => $data['payment_type'],
+                            'state'            => Placed::$name,
+                            'sale_price_pkr'   => (int) $data['sale_price_pkr'],
+                            'take_rate_pct'    => (int) $data['take_rate_pct'],
+                            'buyer_contact'    => $data['buyer_contact'] ?: null,
+                        ]);
+
+                        // Mark listing sold
+                        $listing->update(['status' => 'sold']);
+
+                        Notification::make()->title('Order recorded in Placed state')->success()->send();
+                    }),
+
+                Action::make('export_csv')
+                    ->label('Export CSV')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('gray')
+                    ->url(route('admin.export.orders'))
+                    ->openUrlInNewTab(),
+            ])
             ->actions([
-                // Cancel before any work has started (both payment types)
                 Action::make('cancel')
                     ->label('Cancel')
                     ->color('danger')
                     ->icon('heroicon-o-x-circle')
                     ->visible(fn (Order $order) => $order->state instanceof Placed)
                     ->requiresConfirmation()
-                    ->modalHeading('Cancel this order?')
-                    ->modalDescription('This will cancel the order. No ledger entry has been written yet.')
+                    ->modalDescription('Cancel this order. No ledger entry has been written yet.')
                     ->action(fn (Order $order) => $order->state->transitionTo(Cancelled::class)),
 
-                // COD: confirm buyer before procuring
                 Action::make('confirm_cod')
                     ->label('Confirm COD')
                     ->color('warning')
@@ -123,7 +192,6 @@ class OrderResource extends Resource
                     ->requiresConfirmation()
                     ->action(fn (Order $order) => $order->state->transitionTo(CodConfirm::class)),
 
-                // COD: cancel after confirm (buyer backed out)
                 Action::make('cancel_cod')
                     ->label('Cancel')
                     ->color('danger')
@@ -131,7 +199,6 @@ class OrderResource extends Resource
                     ->requiresConfirmation()
                     ->action(fn (Order $order) => $order->state->transitionTo(Cancelled::class)),
 
-                // Move to Procuring
                 Action::make('start_procuring')
                     ->label('Start procuring')
                     ->color('primary')
@@ -154,7 +221,6 @@ class OrderResource extends Resource
                     ->requiresConfirmation()
                     ->action(fn (Order $order) => $order->state->transitionTo(OutForDelivery::class)),
 
-                // Prepaid: delivered (no cash step)
                 Action::make('delivered')
                     ->label('Delivered')
                     ->color('success')
@@ -162,13 +228,12 @@ class OrderResource extends Resource
                     ->requiresConfirmation()
                     ->action(fn (Order $order) => $order->state->transitionTo(\App\States\Order\Delivered::class)),
 
-                // COD: collected (cash in hand — writes ledger)
                 Action::make('collected')
                     ->label('Cash collected')
                     ->color('success')
                     ->visible(fn (Order $order) => $order->state instanceof OutForDelivery && $order->isCod())
                     ->requiresConfirmation()
-                    ->modalDescription('Confirm that cash has been physically collected from the buyer. This will write the seller\'s ledger entry.')
+                    ->modalDescription('Confirm cash has been physically collected. This writes the seller ledger entry.')
                     ->action(fn (Order $order) => $order->state->transitionTo(Collected::class)),
 
                 Action::make('delivery_failed')
