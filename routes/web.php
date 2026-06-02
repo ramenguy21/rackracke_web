@@ -35,6 +35,9 @@ Route::middleware('auth:seller')->prefix('seller')->name('seller.')->group(funct
     Route::post('/listings/upload-photo', function (Request $request) {
         $request->validate(['photo' => 'required|image|max:10240']);
         $path = $request->file('photo')->store('listings', 's3');
-        return response()->json(['url' => Storage::disk('s3')->url($path), 'path' => $path]);
+        return response()->json([
+            'url'  => Storage::disk('s3')->temporaryUrl($path, now()->addHours(6)),
+            'path' => $path,
+        ]);
     })->name('listings.upload-photo');
 });

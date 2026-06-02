@@ -7,7 +7,7 @@
 <div class="order-row sale-row">
     <a href="{{ route('seller.listings.show', $order->listing) }}" class="thumb" wire:navigate>
         @if ($order->listing->photos && count($order->listing->photos) > 0)
-            <img src="{{ Storage::disk('s3')->url($order->listing->photos[0]) }}" alt="{{ $order->listing->title }}">
+            <img src="{{ Storage::disk('s3')->temporaryUrl($order->listing->photos[0], now()->addDay()) }}" alt="{{ $order->listing->title }}">
         @endif
     </a>
 

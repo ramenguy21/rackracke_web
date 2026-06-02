@@ -53,11 +53,10 @@ return [
             'secret' => env('AWS_SECRET_ACCESS_KEY'),
             'region' => env('AWS_DEFAULT_REGION', 'auto'),
             'bucket' => env('AWS_BUCKET'),
-            // If AWS_URL is not set, derive it as {endpoint}/{bucket} (path-style public URL)
-            'url' => env('AWS_URL', rtrim(env('AWS_ENDPOINT_URL_S3', env('AWS_ENDPOINT', '')), '/').'/'.env('AWS_BUCKET', '')),
+            // Railway injects AWS_ENDPOINT_URL_S3; fall back to AWS_ENDPOINT for other providers
             'endpoint' => env('AWS_ENDPOINT_URL_S3', env('AWS_ENDPOINT')),
-            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', true),
-            'visibility' => 'public',
+            // Railway uses virtual-hosted style (bucket as subdomain) by default
+            'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
             'throw' => false,
             'report' => false,
         ],

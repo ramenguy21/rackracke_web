@@ -27,7 +27,7 @@
 
     {{-- ── Photo upload (Alpine) ──────────────────────────────────── --}}
     <div
-      x-data="photoUpload({{ json_encode(array_map(fn($p) => ['id' => $p, 'url' => Storage::disk('s3')->url($p), 'serverPath' => $p, 'uploading' => false, 'error' => null], $photos ?? [])) }}, '{{ route('seller.listings.upload-photo') }}')"
+      x-data="photoUpload({{ json_encode(array_map(fn($p) => ['id' => $p, 'url' => Storage::disk('s3')->temporaryUrl($p, now()->addHours(6)), 'serverPath' => $p, 'uploading' => false, 'error' => null], $photos ?? [])) }}, '{{ route('seller.listings.upload-photo') }}')"
       @dragover.prevent="dragging = true"
       @dragleave.prevent="dragging = false"
       @drop.prevent="onDrop($event)"

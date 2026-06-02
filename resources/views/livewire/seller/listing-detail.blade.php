@@ -57,7 +57,7 @@
     @if (!empty($listing->photos))
       <div class="pd2-hero">
         <img
-          :src="[{{ collect($listing->photos)->map(fn($p) => "'" . Storage::disk('s3')->url($p) . "'")->join(', ') }}][activePhoto]"
+          :src="[{{ collect($listing->photos)->map(fn($p) => "'" . Storage::disk('s3')->temporaryUrl($p, now()->addDay()) . "'")->join(', ') }}][activePhoto]"
           alt="{{ $listing->title }}"
           style="transition: opacity 0.3s ease"
         >
@@ -75,7 +75,7 @@
               :class="{ on: activePhoto === {{ $i }} }"
               @click="activePhoto = {{ $i }}"
             >
-              <img src="{{ Storage::disk('s3')->url($photo) }}" alt="">
+              <img src="{{ Storage::disk('s3')->temporaryUrl($photo, now()->addDay()) }}" alt="">
             </button>
           @endforeach
         </div>

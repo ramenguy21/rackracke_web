@@ -1,8 +1,6 @@
 import Sort from '@alpinejs/sort'
 
 // Livewire 3 bundles and starts Alpine — do NOT call Alpine.start() here.
-// Register plugins and components via alpine:init so they're available
-// on the single Livewire-managed Alpine instance.
 document.addEventListener('alpine:init', () => {
     Alpine.plugin(Sort)
 
@@ -33,24 +31,32 @@ document.addEventListener('alpine:init', () => {
             for (const file of imageFiles) {
                 const id = crypto.randomUUID()
                 const blobUrl = URL.createObjectURL(file)
-                const entry = { id, url: blobUrl, serverPath: null, uploading: true, error: null }
-                this.photos.push(entry)
+                // Push first so the slot appears immediately with a spinner
+                this.photos.push({ id, url: blobUrl, serverPath: null, uploading: true, error: null })
 
                 try {
                     const form = new FormData()
                     form.append('photo', file)
                     form.append('_token', csrf)
                     const res = await fetch(this.uploadUrl, { method: 'POST', body: form })
-                    if (!res.ok) throw new Error(res.statusText)
+                    if (!res.ok) throw new Error(`Upload failed: ${res.status} ${res.statusText}`)
                     const data = await res.json()
 
                     URL.revokeObjectURL(blobUrl)
-                    entry.url = data.url
-                    entry.serverPath = data.path
-                    entry.uploading = false
-                } catch {
-                    entry.uploading = false
-                    entry.error = true
+                    // Mutate through the reactive proxy (this.photos[idx]) not the original reference
+                    const idx = this.photos.findIndex(p => p.id === id)
+                    if (idx !== -1) {
+                        this.photos[idx].url = data.url
+                        this.photos[idx].serverPath = data.path
+                        this.photos[idx].uploading = false
+                    }
+                } catch (err) {
+                    console.error('[rackrake] photo upload error:', err)
+                    const idx = this.photos.findIndex(p => p.id === id)
+                    if (idx !== -1) {
+                        this.photos[idx].uploading = false
+                        this.photos[idx].error = true
+                    }
                 }
 
                 this.syncPhotos()
