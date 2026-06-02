@@ -15,6 +15,7 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Tables\Filters\SelectFilter;
 
 class SellerResource extends Resource
@@ -106,7 +107,7 @@ class SellerResource extends Resource
                         Notification::make()->title('Seller suspended')->danger()->send();
                     }),
 
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ]);
     }
 
