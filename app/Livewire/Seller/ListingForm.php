@@ -30,7 +30,7 @@ class ListingForm extends Component
             $this->description = $listing->description ?? '';
             $this->condition   = $listing->condition;
             $this->price       = (string) $listing->price_pkr;
-            $this->photos      = $listing->photos ?? [];
+            $this->photos      = $listing->validPhotos();
         }
     }
 

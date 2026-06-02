@@ -15,6 +15,9 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+RUN echo "upload_max_filesize = 20M\npost_max_size = 50M\nmemory_limit = 256M" \
+    > /usr/local/etc/php/conf.d/rackrake.ini
+
 WORKDIR /app
 
 COPY composer.json composer.lock ./

@@ -43,6 +43,18 @@ class Listing extends Model
         return $this->hasMany(Order::class);
     }
 
+    /**
+     * Returns only paths that are valid S3 storage paths.
+     * Filters out blob: URLs and absolute URLs from old broken uploads.
+     */
+    public function validPhotos(): array
+    {
+        return array_values(array_filter(
+            $this->photos ?? [],
+            fn ($p) => is_string($p) && $p !== '' && !str_starts_with($p, 'blob:') && !str_starts_with($p, 'http')
+        ));
+    }
+
     public function isLive(): bool
     {
         return $this->status === 'live';

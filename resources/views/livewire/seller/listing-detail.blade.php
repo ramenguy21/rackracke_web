@@ -54,10 +54,11 @@
     </div>
 
     {{-- ── Hero image + thumbnails ──────────────────────────────────── --}}
-    @if (!empty($listing->photos))
+    @php $validPhotos = $listing->validPhotos() @endphp
+    @if (!empty($validPhotos))
       <div class="pd2-hero">
         <img
-          :src="[{{ collect($listing->photos)->map(fn($p) => "'" . Storage::disk('s3')->temporaryUrl($p, now()->addDay()) . "'")->join(', ') }}][activePhoto]"
+          :src="[{{ collect($validPhotos)->map(fn($p) => "'" . Storage::disk('s3')->temporaryUrl($p, now()->addDay()) . "'")->join(', ') }}][activePhoto]"
           alt="{{ $listing->title }}"
           style="transition: opacity 0.3s ease"
         >
@@ -66,9 +67,9 @@
         </div>
       </div>
 
-      @if (count($listing->photos) > 1)
+      @if (count($validPhotos) > 1)
         <div class="pd2-thumbs">
-          @foreach ($listing->photos as $i => $photo)
+          @foreach ($validPhotos as $i => $photo)
             <button
               type="button"
               class="t"

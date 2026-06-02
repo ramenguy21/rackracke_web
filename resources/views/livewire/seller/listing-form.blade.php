@@ -66,6 +66,10 @@
               <div x-show="photo.uploading" class="slot-overlay">
                 <div class="slot-spinner"></div>
               </div>
+              <div x-show="photo.error" class="slot-overlay" style="background:rgba(183,42,42,0.8);display:none;flex-direction:column;align-items:center;justify-content:center;gap:4px">
+                <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                <span style="color:white;font-size:10px;font-weight:600">Failed</span>
+              </div>
             </div>
           </template>
 
