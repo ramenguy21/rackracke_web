@@ -1,58 +1,219 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Rack Rake — Seller Portal
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+The operations backend for [Rack Rake](https://sell.rackrake.shop), a C2C secondhand-fashion marketplace for the Pakistan market.
 
-## About Laravel
+This portal is **not the storefront**. Buyers never see it. It is the tool that sellers use to list items, track orders, and get paid — and the tool the Rack Rake team uses to run the business day-to-day.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**Production URL:** `https://sell.rackrake.shop`
+**Admin panel:** `https://sell.rackrake.shop/admin`
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## What it does
 
-## Learning Laravel
+| Sellers can... | The Rack Rake team can... |
+|---|---|
+| Register and set up their shop profile | Review and approve/reject listings |
+| Submit listings with photos | Advance orders through the fulfilment lifecycle |
+| Track their orders and sales | Record manual orders from Shopify |
+| See their wallet balance and payout history | Mark seller payouts as paid |
+| Read reviews from buyers | Approve/verify/suspend seller accounts |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Division of responsibility:**
+- **Shopify** owns the buyer-facing storefront, product catalog, cart, checkout, and payment collection. Shopify is the source of truth for "is this item for sale".
+- **This portal** owns seller identity, listing submissions (drafts before they reach Shopify), the order lifecycle, and the money ledger.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Stack
 
-## Agentic Development
+- **PHP 8.4**, **Laravel 13**
+- **Livewire 3** + **Alpine.js** (Livewire bundles Alpine — do not import Alpine separately)
+- **Filament 4** — admin panel at `/admin`
+- **PostgreSQL** — via Railway plugin in production, local Postgres for dev
+- **Vite 8** + **Tailwind 4**
+- **spatie/laravel-model-states** — order state machine
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
+
+## Running locally
+
+### Prerequisites
+
+- PHP 8.4+ with extensions: `pdo_pgsql`, `pgsql`, `mbstring`, `zip`, `gd`, `bcmath`, `intl`
+- Composer 2
+- Node.js 20+ and npm
+- A running PostgreSQL instance
+
+### First-time setup
 
 ```bash
-composer require laravel/boost --dev
+cd portal
 
-php artisan boost:install
+# Install PHP and JS dependencies, copy .env, generate app key, run migrations, build assets
+composer setup
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+That single command runs:
+1. `composer install`
+2. Copies `.env.example` → `.env` (if `.env` doesn't exist)
+3. `php artisan key:generate`
+4. `php artisan migrate --force`
+5. `npm install` + `npm run build`
 
-## Contributing
+### Configure your .env
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Open `.env` and set at minimum:
 
-## Code of Conduct
+```
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=rack_rake
+DB_USERNAME=postgres
+DB_PASSWORD=
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+APP_URL=http://localhost:8000
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
+FILESYSTEM_DISK=local
+```
 
-## Security Vulnerabilities
+Leave `SHOPIFY_*` variables empty for local development — the Shopify integration is not yet active.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### Start the dev server
 
-## License
+```bash
+composer dev
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This starts four processes in parallel via `concurrently`:
+- `php artisan serve` — app on `http://localhost:8000`
+- `npm run dev` — Vite HMR for asset changes
+- `php artisan queue:listen` — processes queued jobs
+- `php artisan pail` — log tail in the terminal
+
+### Create an admin account
+
+```bash
+php artisan admin:create
+```
+
+Then log in at `http://localhost:8000/admin`.
+
+---
+
+## Environment variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `APP_KEY` | Yes | Generated by `php artisan key:generate` |
+| `APP_URL` | Yes | Full URL including scheme, no trailing slash |
+| `APP_ENV` | Yes | `local` or `production` |
+| `APP_DEBUG` | Yes | `true` locally, `false` in production |
+| `DATABASE_URL` | Production | Injected by Railway Postgres plugin |
+| `DB_*` | Local dev | Standard Laravel DB connection vars |
+| `SESSION_DRIVER` | Yes | Use `database` |
+| `CACHE_STORE` | Yes | Use `database` |
+| `QUEUE_CONNECTION` | Yes | Use `database` |
+| `FILESYSTEM_DISK` | Yes | `local` (S3 optional) |
+| `SHOPIFY_STORE_DOMAIN` | No | e.g. `yourstore.myshopify.com` — needed for Shopify integration |
+| `SHOPIFY_ADMIN_API_TOKEN` | No | For pushing listings to Shopify |
+| `SHOPIFY_WEBHOOK_SECRET` | No | For verifying incoming `orders/paid` webhooks |
+
+---
+
+## Deployment (Railway)
+
+The app is deployed via Docker on Railway. Push to `main` triggers a rebuild.
+
+**Build:** Railway runs the `Dockerfile`, which installs dependencies and builds frontend assets.
+
+**Start:** `railway.json` overrides the CMD with:
+```
+php artisan migrate --force && php artisan storage:link --force; php artisan serve --host=0.0.0.0 --port=8080
+```
+
+**Port:** 8080. Set Railway's exposed port to 8080.
+
+**Queue worker (not yet deployed):** To process webhook jobs, add a second Railway service with start command:
+```
+php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+```
+
+See [`ops.md`](../ops.md) for the full operations manual.
+
+---
+
+## Project structure
+
+```
+app/
+  Filament/Resources/     Admin panel: Orders, Ledger, Sellers, Listings
+  Http/Controllers/       ShopifyWebhookController
+  Jobs/                   ProcessShopifyOrderPaid (queued, idempotent)
+  Livewire/Seller/        9 seller-facing screen components
+  Models/                 Seller, Listing, Order, LedgerEntry, Admin
+  Services/               ShopifyService stub
+  States/Order/           13 states + 11 transition classes
+
+resources/
+  css/                    rackrake.css (design tokens), animations.css, screens.css
+  views/
+    livewire/seller/      9 screen views
+    layouts/              seller.blade.php, seller-bare.blade.php
+
+routes/
+  web.php                 Seller guest + auth routes
+  api.php                 Shopify webhook endpoint
+```
+
+---
+
+## Data model (summary)
+
+**sellers** — shop profile, payout details, status (pending / approved / suspended)
+
+**listings** — seller-submitted items; `price_pkr` and all money fields are **integer PKR, never floats**; `photos` is a JSON array of storage paths; `status` flows: `draft → pending_review → live → sold | withdrawn`
+
+**orders** — one per sale; `sale_price_pkr` and `take_rate_pct` are snapshotted at creation and never recomputed
+
+**ledger_entries** — one per settled order; `amount_owed_pkr` is written once and never changed
+
+---
+
+## Order lifecycle
+
+### Prepaid
+```
+Placed → Procuring* → OutForDelivery → Delivered → Settled
+              └→ ProcurementFailed → Refunded
+```
+Ledger entry written on entering **Procuring** (payment already collected).
+
+### COD
+```
+Placed → CodConfirm → Procuring → OutForDelivery → Collected* → Settled
+              └→ Cancelled              └→ DeliveryFailed → ReturnedToSeller
+```
+Ledger entry written on entering **Collected** (cash physically in hand).
+
+---
+
+## Auth
+
+Two completely separate guards — never mix them:
+
+| Guard | Model | Login |
+|---|---|---|
+| `seller` | `App\Models\Seller` | `/login` |
+| `admin` | `App\Models\Admin` | `/admin/login` (Filament) |
+
+---
+
+## Running tests
+
+```bash
+composer test
+```

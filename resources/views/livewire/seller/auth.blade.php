@@ -170,13 +170,12 @@
 
     {{-- New seller CTA --}}
     @if ($mode === 'oauth')
-      <div style="margin-top:var(--s-5);padding-top:var(--s-5);border-top:1px solid var(--line)">
+      <div class="flex flex-col" style="margin-top:var(--s-5);padding-top:var(--s-5);border-top:1px solid var(--line)">
         <p style="text-align:center;font-size:13px;color:var(--muted);margin-bottom:var(--s-3)">New to rackrake?</p>
         <a href="{{ route('seller.onboarding') }}"
-           class="oauth-btn"
+           class="oauth-btn py-2 px-4 m-auto"
            style="background:var(--yellow);color:var(--ink);border-color:transparent;font-weight:700"
            wire:navigate>
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
           Create your shop — it's free
         </a>
       </div>
